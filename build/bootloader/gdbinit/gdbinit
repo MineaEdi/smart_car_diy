@@ -1,0 +1,2 @@
+source D:/smart_car_diy/build/bootloader/gdbinit/symbols
+source D:/smart_car_diy/build/bootloader/gdbinit/connect
