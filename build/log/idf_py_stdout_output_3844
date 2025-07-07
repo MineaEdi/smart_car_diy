@@ -1,0 +1,113 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+confi�ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6276
+load:0x40078000,len:15748
+load:0x40080400,len:4
+ho 8 tail 4 room 4
+load:0x40080404,len:3860
+entry 0x4008063c
+[0;32mI (31) boot: ESP-IDF v5.4.1 2nd stage bootloader[0m
+[0;32mI (31) boot: compile time Jul  7 2025 23:55:36[0m
+[0;32mI (31) boot: Multicore bootloader[0m
+[0;32mI (32) boot: chip revision: v3.1[0m
+[0;32mI (35) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (39) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (43) boot.esp32: SPI Flash Size : 4MB[0m
+[0;32mI (46) boot: Enabling RNG early entropy source...[0m
+[0;32mI (51) boot: Partition Table:[0m
+[0;32mI (53) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (60) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (66) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (73) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (79) boot: End of partition table[0m
+[0;32mI (82) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=12f70h ( 77680) map[0m
+[0;32mI (116) esp_image: segment 1: paddr=00022f98 vaddr=3ff80000 size=0001ch (    28) load[0m
+[0;32mI (117) esp_image: segment 2: paddr=00022fbc vaddr=3ffbdb60 size=04e00h ( 19968) load[0m
+[0;32mI (128) esp_image: segment 3: paddr=00027dc4 vaddr=40080000 size=08254h ( 33364) load[0m
+[0;32mI (141) esp_image: segment 4: paddr=00030020 vaddr=400d0020 size=54eb4h (347828) map[0m
+[0;32mI (260) esp_image: segment 5: paddr=00084edc vaddr=40088254 size=0fc78h ( 64632) load[0m
+[0;32mI (297) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (297) boot: Disabling RNG early entropy source...[0m
+[0;32mI (308) cpu_start: Multicore app[0m
+[0;32mI (316) cpu_start: Pro cpu start user code[0m
+[0;32mI (316) cpu_start: cpu freq: 240000000 Hz[0m
+[0;32mI (316) app_init: Application information:[0m
+[0;32mI (316) app_init: Project name:     smart_car_diy[0m
+[0;32mI (320) app_init: App version:      30288a2-dirty[0m
+[0;32mI (325) app_init: Compile time:     Jul  7 2025 23:55:10[0m
+[0;32mI (330) app_init: ELF file SHA256:  1166d7bd6...[0m
+[0;32mI (334) app_init: ESP-IDF:          v5.4.1[0m
+[0;32mI (338) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (342) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (346) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (350) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (356) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (361) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (366) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (371) heap_init: At 3FFC57A0 len 0001A860 (106 KiB): DRAM[0m
+[0;32mI (377) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (382) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (388) heap_init: At 40097ECC len 00008134 (32 KiB): IRAM[0m
+[0;32mI (394) spi_flash: detected chip: generic[0m
+[0;32mI (396) spi_flash: flash io: dio[0m
+[0;33mW (400) ADC: legacy driver is deprecated, please migrate to `esp_adc/adc_oneshot.h`[0m
+[0;32mI (407) coexist: coex firmware version: e727207[0m
+[0;32mI (412) main_task: Started on CPU0[0m
+[0;32mI (422) main_task: Calling app_main()[0m
+[0;32mI (432) BTDM_INIT: BT controller compile version [dc1cd58][0m
+[0;32mI (432) BTDM_INIT: Bluetooth MAC: a0:a3:b3:97:54:ca[0m
+[0;32mI (432) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07[0m
+[0;32mI (652) BLE-Server: BLE server initialised![0m
+[0;32mI (662) gpio: GPIO[12]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (662) gpio: GPIO[14]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+Distance 43.51
+Distance 70.23
+[0;32mI (692) NimBLE: Failed to restore IRKs from store; status=8[0m
+
+[0;32mI (702) NimBLE: GAP procedure initiated: advertise; [0m
+[0;32mI (702) NimBLE: disc_mode=2[0m
+[0;32mI (702) NimBLE:  adv_channel_map=0 own_addr_type=0 adv_filter_policy=0 adv_itvl_min=0 adv_itvl_max=0[0m
+[0;32mI (702) NimBLE: [0m
+
+Distance 43.49
+Distance 42.69
+Distance 22.48
+Distance 43.89
+Distance 15.57
+Distance 16.84
+Distance 14.61
+Distance 9.81
+Distance 9.50
+Distance 8.92
+Distance 7.75
+Distance 8.64
+Distance 8.04
+Distance 5.68
+Distance 4.49
+Distance 3.89
+Distance 13.94
+Distance 13.65
+Distance 13.36
+Distance 14.92
+Distance 14.61
+Distance 17.17
+Distance 17.18
+Distance 23.07
+Distance 29.07
+Distance 17.84
+Distance 22.76
+Distance 21.33
+Distance 17.84
+Distance 16.21
+Distance 31.11
+Distance 50.54
+Distance 50.54
+Distance 51.02
+Distance 51.47

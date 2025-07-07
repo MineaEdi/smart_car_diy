@@ -52,6 +52,7 @@ D:/smart_car_diy/build/esp-idf/esp_netif/libesp_netif.a
 D:/smart_car_diy/build/esp-idf/wpa_supplicant/libwpa_supplicant.a
 D:/smart_car_diy/build/esp-idf/esp_coex/libesp_coex.a
 D:/smart_car_diy/build/esp-idf/esp_wifi/libesp_wifi.a
+D:/smart_car_diy/build/esp-idf/bt/libbt.a
 D:/smart_car_diy/build/esp-idf/unity/libunity.a
 D:/smart_car_diy/build/esp-idf/cmock/libcmock.a
 D:/smart_car_diy/build/esp-idf/console/libconsole.a

@@ -12,6 +12,7 @@
   },
   "idf.portWin": "COM6",
   "files.associations": {
-    "memspi_host_driver.h": "c"
+    "memspi_host_driver.h": "c",
+    "nimble_port.h": "c"
   }
 }

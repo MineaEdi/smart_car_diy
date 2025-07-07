@@ -17,6 +17,7 @@
 #include "driver/gpio.h"
 #include "driver/adc.h"
 #include "driver/ledc.h" // PWM lib
+#include "ble_server.h"
 
 /*void app_main(void)
 {
@@ -100,6 +101,7 @@ bool follow_me_home = false;
 // === ULTRASONIC SENSOR GPIO mapping ===
 #define HC_TRIG_PIN GPIO_NUM_12
 #define HC_ECHO_PIN GPIO_NUM_14
+#define ECHO_TIMEOUT_US 30000 // 30000 us ~ 5 meter
 
 // === TCRT5000 GPIO MAPPING ===
 #define IR_LEFT_ADC_CHANNEL   ADC1_CHANNEL_4   // GPIO32
@@ -390,55 +392,46 @@ void servo_set_angle(uint8_t angle)
 
 void ultrasonic_init(void)
 {
+    gpio_reset_pin(HC_TRIG_PIN);
     gpio_set_direction(HC_TRIG_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(HC_TRIG_PIN, 0);
+
+    gpio_reset_pin(HC_ECHO_PIN);
     gpio_set_direction(HC_ECHO_PIN, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(HC_ECHO_PIN, GPIO_PULLDOWN_ONLY);
 }
 
 float ultrasonic_get_distance_cm(void)
 {
-    // trig LOW 2us
+    /* --- Trigger the ultrasonic burst --- */
     gpio_set_level(HC_TRIG_PIN, 0);
     esp_rom_delay_us(2);
 
-    // trig HIGH 10us
     gpio_set_level(HC_TRIG_PIN, 1);
     esp_rom_delay_us(10);
     gpio_set_level(HC_TRIG_PIN, 0);
 
-    // wait for ECHO PIN get HIGH
-    uint32_t timeout = 100000; // 100ms wait
-    uint32_t start_time = 0;
-    while (gpio_get_level(HC_ECHO_PIN) == 0 && timeout--)
-    {
-        esp_rom_delay_us(10);
+    int64_t t0 = esp_timer_get_time();
+    while (!gpio_get_level(HC_ECHO_PIN)) {
+        if ((esp_timer_get_time() - t0) > ECHO_TIMEOUT_US) {
+            // no rising edge -> sensor not responding
+            return -1.0f;
+        }
     }
-    if (timeout == 0)
-    {
-        printf("Timeout wait ECHO HIGH\n");
-        return -1;
-    }
-    
-    start_time = esp_timer_get_time();
 
-    // wait for ECHO PIN get LOW
-    timeout = 100000; // 100ms wait
-    while (gpio_get_level(HC_ECHO_PIN) == 1 && timeout--)
-    {
-        esp_rom_delay_us(10);
+    int64_t echo_start = esp_timer_get_time();
+    while (gpio_get_level(HC_ECHO_PIN)) {
+        if ((esp_timer_get_time() - echo_start) > ECHO_TIMEOUT_US) {
+            // pulse too long -> object out of range
+            return -1.0f;
+        }
     }
-    if (timeout == 0)
-    {
-        printf("Timeout wait ECHO LOW\n");
-        return -1;
-    }
-    
-    uint32_t end_time = esp_timer_get_time();
+    int64_t echo_end = esp_timer_get_time();
 
-    // calculate duration and time
-    uint32_t duration = end_time - start_time; // in us
-    float distance_cm = (duration * 0.0343f) / 2.0f; // 343 m/s -> 0.0343
-
-    return distance_cm;
+    // duration (us) * speed of sound (0.0343 cm/us) / 2
+    float duration_us = (float)(echo_end - echo_start);
+    printf("Distance %.2f\n", (duration_us * 0.0343f) * 0.5f);
+    return (duration_us * 0.0343f) * 0.5f;
 }
 
 void ir_sensors_init(void)
@@ -514,6 +507,7 @@ void motorB_backward(uint32_t speed) {
 
 void app_main(void)
 {
+    ble_server_init();
     shift_register_init();
     photoresistor_init();
     buzzer_init();
@@ -533,136 +527,142 @@ void app_main(void)
     uint16_t right_val = ir_sensor_read_right();
 
     while (1) {
-        printf("Distance: %.2f cm\n", dist);
-        buzzer_beep_pattern(3, 200); // 3 beeps of 200ms
-        update_leds(); // turn on only Lock LED (Red)
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(20);
-        printf("Motor 20\n");
-        servo_set_angle(70);
-        printf("Servo set at %d degrees\n", 70);
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // printf("Distance: %.2f cm\n", dist);
+        // buzzer_beep_pattern(3, 200); // 3 beeps of 200ms
+        // update_leds(); // turn on only Lock LED (Red)
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(20);
+        // printf("Motor 20\n");
+        // servo_set_angle(70);
+        // printf("Servo set at %d degrees\n", 70);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        // sim transitions
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        is_locked = false;
-        is_dark = (photoresistor_read() < 1800);
-        update_leds(); // turn on only Unlock LED (Green)
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(40);
-        printf("Motor 40\n");
-        servo_set_angle(80);
-        printf("Servo set at %d degrees\n", 80);
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        left_val = ir_sensor_read_left();
-        right_val = ir_sensor_read_right();
-        printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // // sim transitions
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // is_locked = false;
+        // is_dark = (photoresistor_read() < 1800);
+        // update_leds(); // turn on only Unlock LED (Green)
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(40);
+        // printf("Motor 40\n");
+        // servo_set_angle(80);
+        // printf("Servo set at %d degrees\n", 80);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // left_val = ir_sensor_read_left();
+        // right_val = ir_sensor_read_right();
+        // printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        is_dark = (photoresistor_read() < 1800);
-        update_leds(); // Unlock LED (Green) remains turned on & turn on head lights + tail lights
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(60);
-        printf("Motor 60\n");
-        servo_set_angle(90);
-        printf("Servo set at %d degrees\n", 90);
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        left_val = ir_sensor_read_left();
-        right_val = ir_sensor_read_right();
-        printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // is_dark = (photoresistor_read() < 1800);
+        // update_leds(); // Unlock LED (Green) remains turned on & turn on head lights + tail lights
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(60);
+        // printf("Motor 60\n");
+        // servo_set_angle(90);
+        // printf("Servo set at %d degrees\n", 90);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // left_val = ir_sensor_read_left();
+        // right_val = ir_sensor_read_right();
+        // printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        follow_me_home = false;
-        is_dark = (photoresistor_read() < 1800);
-        update_leds(); // keep previous state because is_dark = true
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(80);
-        printf("Motor 80\n");
+        // follow_me_home = false;
+        // is_dark = (photoresistor_read() < 1800);
+        // update_leds(); // keep previous state because is_dark = true
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(80);
+        // printf("Motor 80\n");
 
-        vTaskDelay(2500 / portTICK_PERIOD_MS); // ESP is resetting on 100 DUTY CYCLE on DC motor
+        // vTaskDelay(2500 / portTICK_PERIOD_MS); // ESP is resetting on 100 DUTY CYCLE on DC motor
        
-        is_dark = (photoresistor_read() < 1800);
-        update_leds(); // keep previous state because is_dark = true
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(100);
-        printf("Motor 100\n");
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // is_dark = (photoresistor_read() < 1800);
+        // update_leds(); // keep previous state because is_dark = true
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(100);
+        // printf("Motor 100\n");
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        is_dark = (photoresistor_read() < 1800);
-        update_leds(); // keep previous state because is_dark = true
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(80);
-        printf("Motor 80\n");
-        servo_set_angle(95);
-        printf("Servo set at %d degrees\n", 95);
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        left_val = ir_sensor_read_left();
-        right_val = ir_sensor_read_right();
-        printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // is_dark = (photoresistor_read() < 1800);
+        // update_leds(); // keep previous state because is_dark = true
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(80);
+        // printf("Motor 80\n");
+        // servo_set_angle(95);
+        // printf("Servo set at %d degrees\n", 95);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // left_val = ir_sensor_read_left();
+        // right_val = ir_sensor_read_right();
+        // printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        is_dark = false;
-        update_leds(); // keep only Unlock LED (Green)
-        light_value = photoresistor_read();
-        printf("Photoresistor value: %u\n", light_value);
-        DHT11_vPrintValues();
-        dc_motor_set_speed(50);
-        printf("Motor 50\n");
-        servo_set_angle(100);
-        printf("Servo set at %d degrees\n", 100);
-        dist = ultrasonic_get_distance_cm();
-        printf("Distance: %.2f cm\n", dist);
-        left_val = ir_sensor_read_left();
-        right_val = ir_sensor_read_right();
-        printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // is_dark = false;
+        // update_leds(); // keep only Unlock LED (Green)
+        // light_value = photoresistor_read();
+        // printf("Photoresistor value: %u\n", light_value);
+        // DHT11_vPrintValues();
+        // dc_motor_set_speed(50);
+        // printf("Motor 50\n");
+        // servo_set_angle(100);
+        // printf("Servo set at %d degrees\n", 100);
+        // dist = ultrasonic_get_distance_cm();
+        // printf("Distance: %.2f cm\n", dist);
+        // left_val = ir_sensor_read_left();
+        // right_val = ir_sensor_read_right();
+        // printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        // vTaskDelay(2500 / portTICK_PERIOD_MS);
 
-        is_locked = true;
+        // is_locked = true;
 
-        while (1) {
-            printf("Forward\n");
-            motorA_forward(800); // max 1023
-            motorB_forward(800);
-            vTaskDelay(pdMS_TO_TICKS(2000));
+        // while (1) {
+        //     printf("Forward\n");
+        //     motorA_forward(800); // max 1023
+        //     motorB_forward(800);
+        //     vTaskDelay(pdMS_TO_TICKS(2000));
 
-            printf("Backward\n");
-            motorA_backward(800);
-            motorB_backward(800);
-            vTaskDelay(pdMS_TO_TICKS(2000));
+        //     printf("Backward\n");
+        //     motorA_backward(800);
+        //     motorB_backward(800);
+        //     vTaskDelay(pdMS_TO_TICKS(2000));
 
-            printf("Stop\n");
-            motorA_forward(0);
-            motorB_forward(0);
-            vTaskDelay(pdMS_TO_TICKS(2000));
-            break;
+        //     printf("Stop\n");
+        //     motorA_forward(0);
+        //     motorB_forward(0);
+        //     vTaskDelay(pdMS_TO_TICKS(2000));
+        //     break;
+        // }
+        // servo_set_angle(90);
+        // printf("Servo set at %d degrees\n", 90);
+        // vTaskDelay(1250 / portTICK_PERIOD_MS);
+
+        for(int i = 0; i < 10; ++i)
+        {
+            dist = ultrasonic_get_distance_cm();
+            vTaskDelay(1250 / portTICK_PERIOD_MS);
         }
-        servo_set_angle(90);
-        printf("Servo set at %d degrees\n", 90);
-        vTaskDelay(1250 / portTICK_PERIOD_MS);
     }
 }
