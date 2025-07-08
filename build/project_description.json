@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "smart_car_diy",
-    "project_version":    "30288a2-dirty",
+    "project_version":    "abf09ae-dirty",
     "project_path":       "D:/smart_car_diy",
     "idf_path":           "C:/Users/HP/esp/v5.4.1/esp-idf",
     "build_dir":          "D:/smart_car_diy/build",
