@@ -1,0 +1,508 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+confi�ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6276
+load:0x40078000,len:15748
+load:0x40080400,len:4
+ho 8 tail 4 room 4
+load:0x40080404,len:3860
+entry 0x4008063c
+[0;32mI (31) boot: ESP-IDF v5.4.1 2nd stage bootloader[0m
+[0;32mI (31) boot: compile time Jul  9 2025 00:00:02[0m
+[0;32mI (31) boot: Multicore bootloader[0m
+[0;32mI (32) boot: chip revision: v3.1[0m
+[0;32mI (35) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (39) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (43) boot.esp32: SPI Flash Size : 4MB[0m
+[0;32mI (46) boot: Enabling RNG early entropy source...[0m
+[0;32mI (51) boot: Partition Table:[0m
+[0;32mI (53) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (60) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (66) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (73) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (79) boot: End of partition table[0m
+[0;32mI (82) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=13010h ( 77840) map[0m
+[0;32mI (116) esp_image: segment 1: paddr=00023038 vaddr=3ff80000 size=0001ch (    28) load[0m
+[0;32mI (117) esp_image: segment 2: paddr=0002305c vaddr=3ffbdb60 size=04e00h ( 19968) load[0m
+[0;32mI (128) esp_image: segment 3: paddr=00027e64 vaddr=40080000 size=081b4h ( 33204) load[0m
+[0;32mI (141) esp_image: segment 4: paddr=00030020 vaddr=400d0020 size=55714h (349972) map[0m
+[0;32mI (261) esp_image: segment 5: paddr=0008573c vaddr=400881b4 size=0fd18h ( 64792) load[0m
+[0;32mI (298) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (298) boot: Disabling RNG early entropy source...[0m
+[0;32mI (308) cpu_start: Multicore app[0m
+[0;32mI (317) cpu_start: Pro cpu start user code[0m
+[0;32mI (317) cpu_start: cpu freq: 240000000 Hz[0m
+[0;32mI (317) app_init: Application information:[0m
+[0;32mI (317) app_init: Project name:     smart_car_diy[0m
+[0;32mI (321) app_init: App version:      ee0e6d4-dirty[0m
+[0;32mI (326) app_init: Compile time:     Jul  8 2025 23:59:28[0m
+[0;32mI (331) app_init: ELF file SHA256:  4a6d6d3ef...[0m
+[0;32mI (335) app_init: ESP-IDF:          v5.4.1[0m
+[0;32mI (339) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (343) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (347) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (351) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (357) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (362) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (367) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (372) heap_init: At 3FFC57C0 len 0001A840 (106 KiB): DRAM[0m
+[0;32mI (377) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (383) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (388) heap_init: At 40097ECC len 00008134 (32 KiB): IRAM[0m
+[0;32mI (395) spi_flash: detected chip: generic[0m
+[0;32mI (397) spi_flash: flash io: dio[0m
+[0;33mW (400) ADC: legacy driver is deprecated, please migrate to `esp_adc/adc_oneshot.h`[0m
+[0;32mI (408) coexist: coex firmware version: e727207[0m
+[0;32mI (413) main_task: Started on CPU0[0m
+[0;32mI (423) main_task: Calling app_main()[0m
+[0;32mI (433) BTDM_INIT: BT controller compile version [dc1cd58][0m
+[0;32mI (433) BTDM_INIT: Bluetooth MAC: a0:a3:b3:97:54:ca[0m
+[0;32mI (433) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07[0m
+[0;32mI (653) BLE-Server: BLE server initialised![0m
+[0;32mI (663) gpio: GPIO[12]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (663) gpio: GPIO[14]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (673) main_task: Returned from app_main()[0m
+[0;32mI (703) NimBLE: Failed to restore IRKs from store; status=8[0m
+
+[0;32mI (703) NimBLE: GAP procedure initiated: advertise; [0m
+[0;32mI (703) NimBLE: disc_mode=2[0m
+[0;32mI (703) NimBLE:  adv_channel_map=0 own_addr_type=0 adv_filter_policy=0 adv_itvl_min=0 adv_itvl_max=0[0m
+[0;32mI (713) NimBLE: [0m
+
+[0;32mI (12163) BLE-Server: BLE GAP EVENT CONNECT OK![0m
+[0;32mI (25563) BLE-Server: RX: line 40[0m
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 82 | IR Right: 4095
+IR Left: 83 | IR Right: 4095
+IR Left: 71 | IR Right: 4095
+IR Left: 64 | IR Right: 4095
+IR Left: 70 | IR Right: 4095
+IR Left: 142 | IR Right: 4095
+IR Left: 673 | IR Right: 4095
+IR Left: 599 | IR Right: 4095
+IR Left: 364 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 3721
+IR Left: 4095 | IR Right: 48
+IR Left: 4095 | IR Right: 47
+IR Left: 4095 | IR Right: 38
+IR Left: 4095 | IR Right: 27
+IR Left: 4095 | IR Right: 19
+IR Left: 4095 | IR Right: 27
+IR Left: 4095 | IR Right: 54
+IR Left: 4095 | IR Right: 79
+IR Left: 4095 | IR Right: 4095
+IR Left: 137 | IR Right: 4095
+IR Left: 109 | IR Right: 4095
+IR Left: 112 | IR Right: 4095
+IR Left: 121 | IR Right: 4095
+IR Left: 134 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 63 | IR Right: 4095
+IR Left: 26 | IR Right: 4095
+IR Left: 0 | IR Right: 4095
+IR Left: 0 | IR Right: 4095
+IR Left: 0 | IR Right: 4095
+IR Left: 19 | IR Right: 4095
+IR Left: 0 | IR Right: 4095
+IR Left: 5 | IR Right: 4095
+IR Left: 31 | IR Right: 4095
+IR Left: 185 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 54
+IR Left: 4095 | IR Right: 61
+IR Left: 4095 | IR Right: 16
+IR Left: 4095 | IR Right: 77
+IR Left: 4095 | IR Right: 3248
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 3094
+IR Left: 4095 | IR Right: 3972
+IR Left: 4095 | IR Right: 4095
+IR Left: 2863 | IR Right: 4095
+IR Left: 90 | IR Right: 4095
+IR Left: 58 | IR Right: 4095
+IR Left: 36 | IR Right: 4095
+IR Left: 35 | IR Right: 4095
+IR Left: 46 | IR Right: 4095
+IR Left: 51 | IR Right: 4095
+IR Left: 65 | IR Right: 4095
+IR Left: 80 | IR Right: 4095
+IR Left: 28 | IR Right: 4095
+IR Left: 12 | IR Right: 4095
+IR Left: 16 | IR Right: 4095
+IR Left: 193 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 110 | IR Right: 4095
+IR Left: 80 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 2361 | IR Right: 4095
+IR Left: 52 | IR Right: 4095
+IR Left: 84 | IR Right: 4095
+IR Left: 112 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 2815 | IR Right: 4095
+IR Left: 84 | IR Right: 4095
+IR Left: 76 | IR Right: 4095
+IR Left: 65 | IR Right: 4095
+IR Left: 64 | IR Right: 4095
+IR Left: 55 | IR Right: 4095
+IR Left: 58 | IR Right: 4095
+IR Left: 48 | IR Right: 4095
+IR Left: 43 | IR Right: 4095
+IR Left: 62 | IR Right: 4095
+IR Left: 112 | IR Right: 4095
+IR Left: 128 | IR Right: 4095
+IR Left: 96 | IR Right: 4095
+IR Left: 70 | IR Right: 4095
+IR Left: 57 | IR Right: 4095
+IR Left: 41 | IR Right: 4095
+IR Left: 56 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+[0;32mI (41513) BLE-Server: RX: line 0[0m
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 2800 | IR Right: 4095
+IR Left: 81 | IR Right: 4095
+IR Left: 78 | IR Right: 4095
+IR Left: 64 | IR Right: 4095
+IR Left: 60 | IR Right: 4095
+IR Left: 77 | IR Right: 4095
+IR Left: 90 | IR Right: 4095
+IR Left: 3999 | IR Right: 4095
+IR Left: 4095 | IR Right: 117
+IR Left: 4095 | IR Right: 81
+IR Left: 4095 | IR Right: 78
+IR Left: 4095 | IR Right: 75
+IR Left: 4095 | IR Right: 73
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+IR Left: 4095 | IR Right: 4095
+[0;32mI (51163) BLE-Server: RX: stop[0m

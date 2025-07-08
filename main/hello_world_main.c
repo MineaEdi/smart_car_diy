@@ -39,6 +39,15 @@ typedef struct
 
 DHT11_struct data;
 
+#define SERVO_CENTER_ANGLE      90
+#define SERVO_MAX_OFFSET_LEFT   20
+#define SERVO_MAX_OFFSET_RIGHT  10
+#define IR_LINE_THRESHOLD   3000
+static volatile bool     lf_active     = false;
+static volatile uint16_t lf_pwm_target = 400;
+
+static TaskHandle_t  lf_task_hdl = NULL;
+
 /*void app_main(void)
 {
     printf("Hello world!\n");
@@ -529,6 +538,125 @@ void object_detection_alert(void) {
     }
 }
 
+void security_lock(void)
+{
+    is_locked = true;
+    follow_me_home = false;
+    update_leds();
+    buzzer_beep_pattern(2, 100);   // blocking
+}
+
+void security_unlock(void)
+{
+    is_locked = false;
+    follow_me_home = true;
+    update_leds();
+    buzzer_beep_pattern(1, 150);   // unblocking
+}
+
+void find_my_car(void)
+{
+    for (int i = 0; i < 5; ++i) { // 5 blinks
+        shift_register_write(LED_HEADLIGHT_LEFT | LED_HEADLIGHT_RIGHT |
+                             LED_TAIL_LEFT      | LED_TAIL_RIGHT);
+        buzzer_on();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        shift_register_write(0);
+        buzzer_off();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
+void FollowMeHome(uint32_t duration_ms)
+{
+    follow_me_home = true;
+    update_leds();
+    vTaskDelay(duration_ms / portTICK_PERIOD_MS);
+    follow_me_home = false;
+    update_leds();
+}
+
+void climate_control(uint8_t desiredTemp)
+{
+    DHT11_vPrintValues();
+    printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+    uint8_t current = data.u8IntegralTemp;
+    int16_t diff = (int16_t)current - desiredTemp;
+
+    uint8_t percent = 0;
+    if (diff > 0) {
+        percent = diff * 10;
+        if (percent > 80) percent = 80;
+    }
+    dc_motor_set_speed(percent);
+    printf("[CLIMA] Tset=%d°C  Tcur=%d°C  ->  motor %d%%\n",
+           desiredTemp, current, percent);
+}
+
+void line_following_step(uint16_t drive_speed_percent)
+{
+    if (drive_speed_percent > 800) 
+        drive_speed_percent = 800;
+
+    left_val  = ir_sensor_read_left();
+    right_val = ir_sensor_read_right();
+    printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+
+    int8_t offset = 0;
+    if (left_val > IR_LINE_THRESHOLD && right_val > IR_LINE_THRESHOLD) {
+        offset = 0;
+    } else if (left_val > IR_LINE_THRESHOLD) {
+        offset = -20;
+    } else if (right_val > IR_LINE_THRESHOLD) {
+        offset =  10;
+    } else {
+        offset = 0;
+        drive_speed_percent = 200;
+    }
+
+    int16_t angle = SERVO_CENTER_ANGLE + offset;
+    if (angle < SERVO_CENTER_ANGLE - SERVO_MAX_OFFSET_LEFT)
+        angle = SERVO_CENTER_ANGLE - SERVO_MAX_OFFSET_LEFT;
+    if (angle > SERVO_CENTER_ANGLE + SERVO_MAX_OFFSET_RIGHT)
+        angle = SERVO_CENTER_ANGLE + SERVO_MAX_OFFSET_RIGHT;
+
+    servo_set_angle((uint8_t)angle);
+    motorA_forward(drive_speed_percent);
+    motorB_forward(drive_speed_percent);
+}
+
+static void line_follow_task(void *arg)
+{
+    const TickType_t period = pdMS_TO_TICKS(60);  // ~16 Hz
+    for (;;) {
+        if (lf_active) {
+            line_following_step(lf_pwm_target);
+        }
+        vTaskDelay(period);
+    }
+}
+
+void start_line_following(uint16_t pwm)
+{
+    if (pwm > 800) pwm = 800;
+    lf_pwm_target = pwm;
+    lf_active     = true;
+
+    if (lf_task_hdl == NULL) {
+        xTaskCreatePinnedToCore(line_follow_task,
+                                "lf_task",
+                                2048, NULL, 5,
+                                &lf_task_hdl, 1);
+    }
+}
+
+void stop_line_following(void)
+{
+    lf_active = false;
+    motorA_forward(0);
+    motorB_forward(0);
+}
+
 void app_main(void)
 {
     ble_server_init();
@@ -546,168 +674,207 @@ void app_main(void)
     follow_me_home = false;
     is_dark = (photoresistor_read() < 1800);
 
-    while (1) {
-        for(int i = 0; i < 10; ++i)
-        {
-            if ( i % 10 == 0) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(20);
-                printf("Motor 20\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(75);
-                printf("Servo set at %d degrees\n", 75);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(0);
-                motorB_forward(0);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 1) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(40);
-                printf("Motor 40\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(80);
-                printf("Servo set at %d degrees\n", 80);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(200);
-                motorB_forward(200);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 2) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(60);
-                printf("Motor 60\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(90);
-                printf("Servo set at %d degrees\n", 90);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(400);
-                motorB_forward(400);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 3) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(80);
-                printf("Motor 80\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(100);
-                printf("Servo set at %d degrees\n", 100);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(600);
-                motorB_forward(600);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 5) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(100);
-                printf("Motor 100\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(100);
-                printf("Servo set at %d degrees\n", 100);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(800);
-                motorB_forward(800);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 6) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(80);
-                printf("Motor 80\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(90);
-                printf("Servo set at %d degrees\n", 90);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(600);
-                motorB_forward(600);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 7) {
-                buzzer_beep_pattern(1, 200);
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(60);
-                printf("Motor 60\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(80);
-                printf("Servo set at %d degrees\n", 80);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(400);
-                motorB_forward(400);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-            else if ( i % 10 == 8) {
-                DHT11_vPrintValues();
-                printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
-                dc_motor_set_speed(40);
-                printf("Motor 40\n");
-                photoR_val = photoresistor_read();
-                printf("Photoresistor value: %u\n", photoR_val);
-                left_val = ir_sensor_read_left();
-                right_val = ir_sensor_read_right();
-                printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
-                servo_set_angle(75);
-                printf("Servo set at %d degrees\n", 75);
-                distance_ultrasonic = ultrasonic_get_distance_cm();
-                printf("Global distance %.2f cm\n\n", distance_ultrasonic);
-                object_detection_alert();
-                // motorA_forward(200);
-                motorB_forward(200);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-            }
-        }
-    }
+    /*while (1) {
+        // for(int i = 0; i < 10; ++i)
+        // {
+        //     if ( i % 10 == 0) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(20);
+        //         printf("Motor 20\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(75);
+        //         printf("Servo set at %d degrees\n", 75);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(0);
+        //         motorB_forward(0);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 1) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(40);
+        //         printf("Motor 40\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(80);
+        //         printf("Servo set at %d degrees\n", 80);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(200);
+        //         motorB_forward(200);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 2) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(60);
+        //         printf("Motor 60\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(90);
+        //         printf("Servo set at %d degrees\n", 90);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(400);
+        //         motorB_forward(400);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 3) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(80);
+        //         printf("Motor 80\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(100);
+        //         printf("Servo set at %d degrees\n", 100);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(600);
+        //         motorB_forward(600);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 5) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(100);
+        //         printf("Motor 100\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(100);
+        //         printf("Servo set at %d degrees\n", 100);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(800);
+        //         motorB_forward(800);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 6) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(80);
+        //         printf("Motor 80\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(90);
+        //         printf("Servo set at %d degrees\n", 90);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(600);
+        //         motorB_forward(600);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 7) {
+        //         buzzer_beep_pattern(1, 200);
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(60);
+        //         printf("Motor 60\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(80);
+        //         printf("Servo set at %d degrees\n", 80);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(400);
+        //         motorB_forward(400);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        //     else if ( i % 10 == 8) {
+        //         DHT11_vPrintValues();
+        //         printf("Temperature: %d°C, Humidity: %d%%\n", data.u8IntegralTemp, data.u8IntegralHum);
+        //         dc_motor_set_speed(40);
+        //         printf("Motor 40\n");
+        //         photoR_val = photoresistor_read();
+        //         printf("Photoresistor value: %u\n", photoR_val);
+        //         left_val = ir_sensor_read_left();
+        //         right_val = ir_sensor_read_right();
+        //         printf("IR Left: %u | IR Right: %u\n", left_val, right_val);
+        //         servo_set_angle(75);
+        //         printf("Servo set at %d degrees\n", 75);
+        //         distance_ultrasonic = ultrasonic_get_distance_cm();
+        //         printf("Global distance %.2f cm\n\n", distance_ultrasonic);
+        //         object_detection_alert();
+        //         motorA_forward(200);
+        //         motorB_forward(200);
+        //         vTaskDelay(1000 / portTICK_PERIOD_MS);
+        //     }
+        // }
+    
+        // security_lock();
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // find_my_car();
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // FollowMeHome(5000);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // security_unlock();
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+        
+        // climate_control(26);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(25);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(24);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(23);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(22);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(23);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(24);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // climate_control(25);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+        // line_following_step(400);
+        // vTaskDelay(80 / portTICK_PERIOD_MS);
+    }*/
 }
